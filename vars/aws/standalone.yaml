@@ -1,0 +1,78 @@
+java:
+  version: 8
+
+env:
+  name: "standalone_kafka"
+  aws:
+    region: us-west-2
+    security_group:
+      name: standalone_kafka
+      rules:
+        - proto: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 9092
+          to_port: 9092
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 2181
+          to_port: 2181
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 2888
+          to_port: 2888
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 3888
+          to_port: 3888
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 9000
+          to_port: 9000
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 9999
+          to_port: 9999
+          cidr_ip: 0.0.0.0/0
+
+      rules_egress:
+        - proto: all
+          cidr_ip: "0.0.0.0/0"
+
+    instances:
+      number: "{{ lookup('env','AWS_INSTANCE_NUMBER') if lookup('env','AWS_INSTANCE_NUMBER') != '' else 1 }}"
+      name: "standalone_kafka_app"
+      type: t2.medium
+      # Termination by this criteria
+      inventory_group: "{{ lookup('env','AWS_INVENTORY_GROUP') if lookup('env','AWS_INVENTORY_GROUP') != '' else 'standalone_kafka' }}"
+      security_groups: ["standalone_kafka"]
+
+    key:
+      name: standalone_kafka
+
+jmx_port: "9999"
+jmx_ip: "{{ ec2_ip_address }}"
+
+kafka:
+  version_kafka: "0.9.0.1"
+  jmx_opts: "-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname={{ jmx_ip }} -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port={{ jmx_port }} -Dcom.sun.management.jmxremote.rmi.port={{ jmx_port }} -Djava.net.preferIPv4Stack=true "
+
+
+zookeeper_servers_group: "{{ lookup('env','KAFKA_MANAGER_ZOOKEEPER_SERVERS_GROUP') if lookup('env','KAFKA_MANAGER_ZOOKEEPER_SERVERS_GROUP') != '' else 'standalone_kafka' }}"
+
+kafka_manager:
+  installation_type: s3
+  sources_tag: 1.3.0.8
+  zip_path: bin/kafka-manager-1.3.0.8.zip
+  env_vars:
+    ZK_HOSTS: "{{ groups['tag_inventory_group_'+zookeeper_servers_group]|map('extract', hostvars, 'ec2_private_ip_address')|list|join(',') }}"
+    JMX_PORT: "{{ jmx_port }}"
+
+
+aws:
+  s3:
+    bucket: paltalk-kafka-manager
+    object: kafka-manager-{{ kafka_manager.sources_tag }}.zip
+    download_path: /tmp/kafka-manager.zip
