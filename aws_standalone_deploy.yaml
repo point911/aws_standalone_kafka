@@ -28,7 +28,7 @@
     - vars/ssh_users/ssh_users.yaml
     - vars/aws/standalone.yaml
     - vars/aws/aws.yaml
-    - vars/deploy.standalone.yaml
+    - vars/deploy/standalone.yaml
 
   pre_tasks:
     - name: Update apt
