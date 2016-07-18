@@ -1,0 +1,14 @@
+---
+
+- name: Generate deploy vars file
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  vars_files:
+    - vars/aws/standalone.yaml
+    - vars/deploy/standalone.yaml
+    - vars/aws/aws.yaml
+
+  roles:
+    - name: community/deploy_config
