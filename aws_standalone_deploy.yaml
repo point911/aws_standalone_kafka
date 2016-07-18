@@ -58,6 +58,7 @@
   vars_files:
     - vars/aws/standalone.yaml
     - vars/aws/aws.yaml
+    - vars/deploy/standalone.yaml
 
   pre_tasks:
     - name: Update apt
