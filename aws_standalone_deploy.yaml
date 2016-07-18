@@ -46,26 +46,26 @@
     - name: community/zookeeper
     - name: community/kafka
 
-#- name: Install kafka manager
-#  hosts:
-#    - tag_inventory_group_{{ env.aws.instances.inventory_group }}
-#  connection: ssh
-#  gather_facts: yes
-#  become: yes
-#
-#  remote_user: ubuntu
-#
-#  vars_files:
-#    - vars/aws/standalone.yaml
-#    - vars/aws/aws.yaml
-#    - vars/deploy/standalone.yaml
-#
-#  pre_tasks:
-#    - name: Update apt
-#      become: yes
-#      apt:
-#        cache_valid_time: 1800
-#        update_cache: yes
-#
-#  roles:
-#    - name: community/kafka_manager
+- name: Install kafka manager
+  hosts:
+    - tag_inventory_group_{{ env.aws.instances.inventory_group }}
+  connection: ssh
+  gather_facts: yes
+  become: yes
+
+  remote_user: ubuntu
+
+  vars_files:
+    - vars/aws/standalone.yaml
+    - vars/aws/aws.yaml
+    - vars/deploy/standalone.yaml
+
+  pre_tasks:
+    - name: Update apt
+      become: yes
+      apt:
+        cache_valid_time: 1800
+        update_cache: yes
+
+  roles:
+    - name: community/kafka_manager
